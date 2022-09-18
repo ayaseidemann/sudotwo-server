@@ -6,6 +6,6 @@ const { getGame, getSolution } = require('../controllers/gameControllers');
 router.get('/:difficulty', getGame);
 
 // get solution
-router.get('/solution', getSolution);
+router.get('/game/solution', getSolution);
 
 module.exports = router;
