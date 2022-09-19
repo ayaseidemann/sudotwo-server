@@ -1,8 +1,56 @@
 const { default: axios } = require('axios');
 const fs = require('fs');
-const { writeGameToJson } = require('../models/gameModels');
+const { writeGameToJson, readRoomsData } = require('../models/gameModels');
 const { v4: uuidv4 } = require('uuid');
 
+async function setupGame(req, res) {
+    try {
+        const difficulty = req.params.difficulty;
+        const {data: axiosBoard} = await axios.get(`https://sugoku.herokuapp.com/board?difficulty=${difficulty}`);
+        const board = axiosBoard.board;
+        const roomId = uuidv4();
+        const {data: axiosSolution} = await axios.post(`https://sugoku.herokuapp.com/solve`, { "board": board });
+        const solution = axiosSolution.solution;
+        readRoomsData((err, data) => {
+            if (err) {
+                console.log('error in reading rooms data');
+            } else {
+                const rooms = JSON.parse(data);
+                const game = {
+                    roomId: roomId,
+                    board: board,
+                    solution: solution
+                }
+                rooms.push(game);
+                writeGameToJson(JSON.stringify(rooms));
+                res.json(game);
+            }
+        })
+    }
+    catch(err) {
+        console.log(err)
+    }
+}
+
+function readSolution(req, res) {
+    const roomId = req.params.roomId;
+    console.log(roomId);
+    readRoomsData((err, data) => {
+        if (err) {
+            console.log('error in reading from file');
+        } else {
+            console.log('in read solution else statement');
+            const rooms = JSON.parse(data);
+            const activeRoom = rooms.find(room => room.roomId === roomId);
+            res.json(activeRoom.solution);
+        }
+    })
+}
+
+module.exports = {
+    setupGame,
+    readSolution
+}
 
 // function getGame(req, res) {
 //     const difficulty = req.params.difficulty;
@@ -18,33 +66,15 @@ const { v4: uuidv4 } = require('uuid');
 //         .catch(err => console.log(err))
 // }
 
-async function getGame(req, res) {
-    try {
-        const difficulty = req.params.difficulty;
-        const {data: getBoard} = await axios.get(`https://sugoku.herokuapp.com/board?difficulty=${difficulty}`);
-        const board = getBoard.board;
-        console.log(board);
-        const roomId = uuidv4();
-        const {data: getSolution} = await axios.post(`https://sugoku.herokuapp.com/solve`, { "board": board });
-        const solution = getSolution.solution;
-        // console.log('the solution is: ', solution);
-        res.json(solution);
-        writeGameToJson(roomId, board, solution);
-    }
-    catch(err) {
-        console.log(err)
-    }
-}
-
-function getSolution(board) {
-    console.log('in the get solution function');
-    // console.log(board);
-    axios.post(`https://sugoku.herokuapp.com/solve`, { "board": board })
-    .then(response => {
-        console.log('in the get solution .then')
-        return(response.data.solution);
-    })
-}
+// function getSolution(board) {
+//     console.log('in the get solution function');
+//     // console.log(board);
+//     axios.post(`https://sugoku.herokuapp.com/solve`, { "board": board })
+//     .then(response => {
+//         console.log('in the get solution .then')
+//         return(response.data.solution);
+//     })
+// }
 
 // function getSolution(req, res) {
 //     console.log('in the get solution function');
@@ -55,12 +85,6 @@ function getSolution(board) {
 //         res.send(response.data.solution);
 //     })
 // }
-
-
-module.exports = {
-    getGame, 
-    getSolution
-}
 
 
     // // function geting board from sudoku
