@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { getGame, getSolution } = require('../controllers/gameControllers');
+const { setupGame, readSolution } = require('../controllers/gameControllers');
 
 // get game based on difficulty
-router.get('/:difficulty', getGame);
+router.get('/game/:difficulty', setupGame);
 
 // get solution
-router.get('/game/solution', getSolution);
+router.get('/solution/:roomId', readSolution);
 
 module.exports = router;

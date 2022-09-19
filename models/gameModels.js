@@ -2,20 +2,15 @@ const fs = require('fs');
 const axios = require('axios');
 
 // read games from json
-function loadVideosData(callback) {
+function readRoomsData(callback) {
     fs.readFile('./data/games.json', 'utf8', callback)
 }
 
 // function to write a game to json
-function writeGameToJson(roomId, board, solution) {
-    const game = {
-        roomId: roomId,
-        board: board,
-        solution: solution
-    }
-    fs.writeFile('./data/games.json', JSON.stringify(game), (err) => {
+function writeGameToJson(rooms) {
+    fs.writeFile('./data/games.json', rooms, (err) => {
         if (err) {
-            console.log('there is an error in writeing game to json', err)
+            console.log('there is an error in writing rooms to json', err)
         }
     })
 }
@@ -31,6 +26,6 @@ function writeGameToJson(roomId, board, solution) {
 // }
 
 module.exports = {
-    writeGameToJson
-    // getSolution
+    writeGameToJson,
+    readRoomsData
 }
