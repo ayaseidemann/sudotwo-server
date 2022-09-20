@@ -3,13 +3,15 @@ const fs = require('fs');
 const { writeGameToJson, readRoomsData } = require('../models/gameModels');
 const { v4: uuidv4 } = require('uuid');
 
+
 async function setupGame(req, res) {
     try {
         const difficulty = req.params.difficulty;
         const {data: axiosBoard} = await axios.get(`https://sugoku.herokuapp.com/board?difficulty=${difficulty}`);
         const board = axiosBoard.board;
         const roomId = uuidv4();
-        const {data: axiosSolution} = await axios.post(`https://sugoku.herokuapp.com/solve`, { "board": board });
+        const encodedBoard = new URLSearchParams({ board: JSON.stringify(board) })
+        const {data: axiosSolution} = await axios.post(`https://sugoku.herokuapp.com/solve`, encodedBoard.toString());
         const solution = axiosSolution.solution;
         readRoomsData((err, data) => {
             if (err) {
