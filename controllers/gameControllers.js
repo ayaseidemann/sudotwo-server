@@ -5,10 +5,8 @@ const { writeGameToJson, readRoomsData } = require('../models/gameModels');
 
 async function setupGame(req, res) {
     try {
-        const difficulty = req.params.difficulty;
-        const roomId = req.body.roomId;
-        console.log(roomId);
-        const {data: axiosBoard} = await axios.get(`https://sugoku.herokuapp.com/board?difficulty=${difficulty}`);
+        const roomId = req.params.roomId;
+        const {data: axiosBoard} = await axios.get(`https://sugoku.herokuapp.com/board?difficulty=easy`);
         const board = axiosBoard.board;
         const encodedBoard = new URLSearchParams({ board: JSON.stringify(board) })
         const {data: axiosSolution} = await axios.post(`https://sugoku.herokuapp.com/solve`, encodedBoard.toString());
@@ -34,24 +32,23 @@ async function setupGame(req, res) {
     }
 }
 
-function readSolution(req, res) {
+function readGame(req, res) {
     const roomId = req.params.roomId;
     console.log(roomId);
     readRoomsData((err, data) => {
         if (err) {
             console.log('error in reading from file');
         } else {
-            console.log('in read solution else statement');
             const rooms = JSON.parse(data);
             const activeRoom = rooms.find(room => room.roomId === roomId);
-            res.json(activeRoom.solution);
+            res.json(activeRoom);
         }
     })
 }
 
 module.exports = {
     setupGame,
-    readSolution
+    readGame
 }
 
 // function getGame(req, res) {
