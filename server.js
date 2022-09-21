@@ -21,6 +21,14 @@ io.on('connection', (socket) => {
     console.log('a user connected');
     socket.on('tile-change', value => {
         console.log('tile change to: ', value);
+    });
+    socket.on('create-game', game => {
+        // console.log('the game received is: ', game);
+        console.log('the id of the game received is: ', socket.id);
+        socket.broadcast.emit(game);
+    });
+    socket.on('join-room', roomId => {
+        console.log('a user joined room ', roomId);
     })
     socket.on('disconnect', () => {
         console.log('user disconnected');
