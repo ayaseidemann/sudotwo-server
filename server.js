@@ -19,6 +19,7 @@ const gameRoutes = require('./routes/gameRoutes');
 // connect socket.io
 io.on('connection', (socket) => {
     console.log('a user connected');
+    
     socket.on('tile-change', value => {
         console.log('tile change to: ', value);
     });
@@ -29,18 +30,20 @@ io.on('connection', (socket) => {
     });
 
     socket.on('join-room', roomId => {
-        console.log('a user joined room' + roomId);
+        console.log('a user joined room', roomId);
+        socket.join(roomId);
     });
 
     socket.on('tile-selected', data => {
         console.log('these are the selected tile coordinates:', data.tileCoords);
-        console.log('data.roomId:' + data.roomId);
+        console.log('data.roomId:' , data.roomId);
         socket.to(data.roomId).emit('receive-tile', data.tileCoords);
+        // socket.broadcast.emit('receive-tile', data.tileCoords);
     });
 
-    socket.on('disconnect', () => {
-        console.log('user disconnected');
-    });
+    // socket.on('disconnect', () => {
+    //     console.log('user disconnected');
+    // });
 });
 
 // set up cors
