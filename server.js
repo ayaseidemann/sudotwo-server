@@ -24,12 +24,20 @@ io.on('connection', (socket) => {
     });
     socket.on('create-game', game => {
         // console.log('the game received is: ', game);
-        console.log('the id of the game received is: ', socket.id);
+        // console.log('the id of the game received is: ', socket.id);
         socket.broadcast.emit(game);
     });
+
     socket.on('join-room', roomId => {
-        console.log('a user joined room ', roomId);
-    })
+        console.log('a user joined room' + roomId);
+    });
+
+    socket.on('tile-selected', data => {
+        console.log('these are the selected tile coordinates:', data.tileCoords);
+        console.log('data.roomId:' + data.roomId);
+        socket.to(data.roomId).emit('receive-tile', data.tileCoords);
+    });
+
     socket.on('disconnect', () => {
         console.log('user disconnected');
     });
