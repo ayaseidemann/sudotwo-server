@@ -46,9 +46,21 @@ function readGame(req, res) {
     })
 }
 
+function getAllGames(req, res) {
+    readRoomsData((err, data) => {
+        if (err) {
+            console.log('error in reading from file');
+        } else {
+            const rooms = JSON.parse(data);
+            res.json(rooms);
+        }
+    })
+}
+
 module.exports = {
     setupGame,
-    readGame
+    readGame,
+    getAllGames
 }
 
 // function getGame(req, res) {
