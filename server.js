@@ -29,9 +29,17 @@ io.on('connection', (socket) => {
         socket.broadcast.emit(game);
     });
 
-    socket.on('join-room', roomId => {
-        console.log('a user joined room', roomId);
+    socket.on('join-room', (roomId) => {
+        console.log('user', socket.id,  'joined room', roomId);
         socket.join(roomId);
+        const roomMap = io.of("/").adapter.sids;
+        let count = 0;
+        roomMap.forEach(element => {
+            if(element.has(roomId)) {
+                count++;
+            }
+        });
+        console.log(roomId, count);
     });
 
     socket.on('tile-selected', (data) => {
