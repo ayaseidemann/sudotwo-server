@@ -6,7 +6,7 @@ const server = http.createServer(app);
 // const io = new Server(server);
 const io = require('socket.io')(server, {
     cors: {
-        origin: ['http://localhost:3000'] 
+        origin: ['http://chookie.local:3000'] 
     }
 });
 
@@ -20,8 +20,8 @@ const gameRoutes = require('./routes/gameRoutes');
 io.on('connection', (socket) => {
     console.log(`a user connected ${socket.id}`);
     
-    socket.on('tile-change', value => {
-        console.log('tile change to: ', value);
+    socket.on('tile-change', data => {
+        socket.to(data.roomId).emit('receive-tile-change', data.board)
     });
     socket.on('create-game', game => {
         // console.log('the game received is: ', game);
@@ -35,9 +35,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('tile-selected', (data) => {
-        console.log('these are the selected tile coordinates:', data.tileCoords);
-        console.log('data.roomId:' , data.roomId);
-        socket.broadcast.to(data.roomId).emit('receive-tile', data.tileCoords);
+        socket.to(data.roomId).emit('receive-tile', data.tileCoords);
     });
 
     // socket.on('disconnect', () => {
