@@ -18,7 +18,7 @@ const gameRoutes = require('./routes/gameRoutes');
 
 // connect socket.io
 io.on('connection', (socket) => {
-    console.log('a user connected');
+    console.log(`a user connected ${socket.id}`);
     
     socket.on('tile-change', value => {
         console.log('tile change to: ', value);
@@ -34,11 +34,10 @@ io.on('connection', (socket) => {
         socket.join(roomId);
     });
 
-    socket.on('tile-selected', data => {
+    socket.on('tile-selected', (data) => {
         console.log('these are the selected tile coordinates:', data.tileCoords);
         console.log('data.roomId:' , data.roomId);
-        socket.to(data.roomId).emit('receive-tile', data.tileCoords);
-        // socket.broadcast.emit('receive-tile', data.tileCoords);
+        socket.broadcast.to(data.roomId).emit('receive-tile', data.tileCoords);
     });
 
     // socket.on('disconnect', () => {
