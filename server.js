@@ -32,6 +32,7 @@ io.on('connection', (socket) => {
     socket.on('join-room', (roomId) => {
         console.log('user', socket.id,  'joined room', roomId);
         socket.join(roomId);
+        // get map object of all users in all rooms, count number in current room
         const roomMap = io.of("/").adapter.sids;
         let count = 0;
         roomMap.forEach(element => {
@@ -39,7 +40,11 @@ io.on('connection', (socket) => {
                 count++;
             }
         });
-        console.log(roomId, count);
+        if (count === 2) {
+            io.in(roomId).emit('go-to-game', roomId);
+        } else if (count > 2) {
+            io.to(socket.id).emit('no-entry', roomId);
+        }
     });
 
     socket.on('tile-selected', (data) => {
