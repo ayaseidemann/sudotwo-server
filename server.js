@@ -57,6 +57,11 @@ io.on('connection', (socket) => {
         socket.to(data.roomId).emit('receive-name', data.sendName);
     });
 
+    socket.on('emoji-change', data => {
+        console.log(data);
+        socket.to(data.roomId).emit('receive-emoji', data.emojiBoard);
+    })
+
     // socket.on('disconnect', () => {
     //     console.log('user disconnected');
     // });
