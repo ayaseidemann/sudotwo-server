@@ -21,7 +21,7 @@ io.on('connection', (socket) => {
     console.log(`a user connected ${socket.id}`);
     
     socket.on('tile-change', data => {
-        socket.to(data.roomId).emit('receive-tile-change', data.board)
+        socket.to(data.roomId).emit('receive-tile-change', {board: data.board, inputBoard: data.inputBoard})
     });
     socket.on('create-game', game => {
         // console.log('the game received is: ', game);
