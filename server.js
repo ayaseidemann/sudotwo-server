@@ -29,7 +29,7 @@ io.on('connection', (socket) => {
         socket.broadcast.emit(game);
     });
 
-    socket.on('join-room', (roomId) => {
+    socket.on('join-room', roomId => {
         console.log('user', socket.id,  'joined room', roomId);
         socket.join(roomId);
         // get map object of all users in all rooms, count number in current room
@@ -41,14 +41,20 @@ io.on('connection', (socket) => {
             }
         });
         if (count === 2) {
+            // send to all in room including self
             io.in(roomId).emit('go-to-game', roomId);
         } else if (count > 2) {
+            // send back just to self (last entered user)
             io.to(socket.id).emit('no-entry', roomId);
         }
     });
 
     socket.on('tile-selected', (data) => {
         socket.to(data.roomId).emit('receive-tile', data.tileCoords);
+    });
+
+    socket.on('send-name', (data) => {
+        socket.to(data.roomId).emit('receive-name', data.sendName);
     });
 
     // socket.on('disconnect', () => {
