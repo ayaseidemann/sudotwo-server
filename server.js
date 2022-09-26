@@ -49,6 +49,10 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('time-change', data =>{
+        socket.to(data.roomId).emit('receive-time', data.timer);
+    })
+
     socket.on('tile-selected', (data) => {
         socket.to(data.roomId).emit('receive-tile', data.tileCoords);
     });
@@ -58,7 +62,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('emoji-change', data => {
-        console.log(data);
         socket.to(data.roomId).emit('receive-emoji', data.emojiBoard);
     })
 
