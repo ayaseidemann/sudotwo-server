@@ -62,6 +62,11 @@ io.on('connection', (socket) => {
         socket.to(data.roomId).emit('receive-emoji', data.emojiBoard);
     })
 
+    socket.on('won-game', roomId => {
+        console.log(roomId, 'won the game!');
+        socket.to(roomId).emit('receive-won-game');
+    })
+
     // socket.on('disconnect', () => {
     //     console.log('user disconnected');
     // });
