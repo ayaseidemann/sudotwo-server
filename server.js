@@ -4,15 +4,16 @@ const http = require('http');
 const server = http.createServer(app);
 // const { Server } = require("socket.io");
 // const io = new Server(server);
+require('dotenv').config();
+
 const io = require('socket.io')(server, {
     cors: {
-        origin: ['http://chookie.local:3000'] 
+        origin: [process.env.CLIENT_URL] 
     }
 });
 
 const cors = require('cors');
-require('dotenv').config();
-const { PORT } = process.env;
+// const { PORT } = process.env;
 const gameRoutes = require('./routes/gameRoutes');
 
 
@@ -88,6 +89,6 @@ app.get('/', (req, res) => {
     res.send('You are in the server woohoo!');
 });
 
-server.listen(PORT, () => {
-    console.log(`server is running on port ${PORT}`);
+server.listen(process.env.PORT, () => {
+    console.log(`server is running on port ${process.env.PORT}`);
 })
