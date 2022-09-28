@@ -2,8 +2,6 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
-// const { Server } = require("socket.io");
-// const io = new Server(server);
 require('dotenv').config();
 
 const io = require('socket.io')(server, {
@@ -13,7 +11,6 @@ const io = require('socket.io')(server, {
 });
 
 const cors = require('cors');
-// const { PORT } = process.env;
 const gameRoutes = require('./routes/gameRoutes');
 
 
@@ -43,7 +40,7 @@ io.on('connection', (socket) => {
         });
         if (count === 2) {
             // send to all in room including self
-            io.in(roomId).emit('go-to-game', roomId);
+            io.in(roomId).emit('go-to-game', {roomId: roomId, player2Id: socket.id});
         } else if (count > 2) {
             // send back just to self (last entered user)
             io.to(socket.id).emit('no-entry', roomId);
@@ -59,6 +56,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send-name', (data) => {
+        console.log('data.sendName', data.sendName);
         socket.to(data.roomId).emit('receive-name', data.sendName);
     });
 
@@ -75,8 +73,25 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('receive-won-game');
     });
 
-    // socket.on('disconnect', () => {
-    //     console.log('user disconnected');
+    socket.on("disconnect", () => {
+        console.log(socket.id, 'user disconnected');
+        // loop through rooms, find room with an id matching socket.id
+        // socket emit to other player that they've been kicked out
+        // delete room and repush all rooms to json
+    });
+
+    // socket.on('user-disconnected', roomId => {
+    //     console.log('a user disconnected in room:', roomId);
+    //     socket.to(roomId).emit('receive-user-disconnected');
+    // });
+
+    // socket.on("disconnect", async () => {
+    //     console.log('starring disconnect func');
+    //     const sockets = await io.in(computeUserId(socket)).fetchSockets();
+    //     if (sockets.length === 0) {
+    //         console.log(socket.id, 'user has disconnected');
+    //       // no more active connections for the given user
+    //     }
     // });
 });
 
