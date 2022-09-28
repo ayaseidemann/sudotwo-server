@@ -6,22 +6,14 @@ const { writeGameToJson, readRoomsData } = require('../models/gameModels');
 async function setupGame(req, res) {
     try {
         const roomId = req.params.roomId;
-        // const {data: axiosBoard} = await axios.get(`http://scottalonzo.local:8080/board?difficulty=easy`);
-        // const {data: axiosBoard} = await axios.get(`http://chookie.local:8080/sugoku-api/board?difficulty=easy`);
-        // const {data: axiosBoard} = await axios.get(`https://sugoku.herokuapp.com/board?difficulty=easy`);
-        // const {data: axiosBoard} = await axios.get(`http://localhost:8090/board?difficulty=easy`);
         const {data: axiosBoard} = await axios.get(`${process.env.API_SERVER_URL}/board?difficulty=easy`);
         const board = axiosBoard.board;
-        const encodedBoard = new URLSearchParams({ board: JSON.stringify(board) })
-        // const {data: axiosSolution} = await axios.post(`http://scottalonzo.local:8080/solve`, encodedBoard.toString());
-        // const {data: axiosSolution} = await axios.post(`http://chookie.local:8080/sugoku-api/solve`, encodedBoard.toString());
-        // const {data: axiosSolution} = await axios.post(`https://sugoku.herokuapp.com/solve`, encodedBoard.toString());
-        // const {data: axiosSolution} = await axios.post(`http://localhost:8090/solve`, encodedBoard.toString());
+        const encodedBoard = new URLSearchParams({ board: JSON.stringify(board) });
         const {data: axiosSolution} = await axios.post(`${process.env.API_SERVER_URL}/solve`, encodedBoard.toString());
         const solution = axiosSolution.solution;
         readRoomsData((err, data) => {
             if (err) {
-                console.log('error in reading rooms data');
+                console.log('error in reading rooms data in setup game function');
             } else {
                 const rooms = JSON.parse(data);
                 const game = {
@@ -38,6 +30,28 @@ async function setupGame(req, res) {
     catch(err) {
         console.log(err)
     }
+}
+
+function addSocketId(req, res) {
+    readRoomsData((err, data) => {
+        if (err) {
+            console.log('error in reading rooms data in add socket id function');
+        } else {
+            const rooms = JSON.parse(data);
+            const roomId = req.params.roomId;
+            const player1Id = req.body.player1Id;
+            const player2Id = req.body.player2Id;
+            for (let i = 0; i < rooms.length; i++) {
+                if (rooms[i].roomId === roomId) {
+                    rooms[i].players = [player1Id, player2Id];
+                    rooms.splice(i, 1, rooms[i]);
+                    break;
+                }
+            }
+            writeGameToJson(JSON.stringify(rooms));
+        }
+        res.send('finished');
+    })
 }
 
 function readGame(req, res) {
@@ -67,6 +81,7 @@ function getAllGames(req, res) {
 
 module.exports = {
     setupGame,
+    addSocketId,
     readGame,
     getAllGames
 }

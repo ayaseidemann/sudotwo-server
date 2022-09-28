@@ -2,8 +2,6 @@ const express = require('express');
 const app = express();
 const http = require('http');
 const server = http.createServer(app);
-// const { Server } = require("socket.io");
-// const io = new Server(server);
 require('dotenv').config();
 
 const io = require('socket.io')(server, {
@@ -13,8 +11,8 @@ const io = require('socket.io')(server, {
 });
 
 const cors = require('cors');
-// const { PORT } = process.env;
 const gameRoutes = require('./routes/gameRoutes');
+const { writeGameToJson, readRoomsData } = require('./models/gameModels');
 
 
 // connect socket.io
@@ -43,7 +41,7 @@ io.on('connection', (socket) => {
         });
         if (count === 2) {
             // send to all in room including self
-            io.in(roomId).emit('go-to-game', roomId);
+            io.in(roomId).emit('go-to-game', {roomId: roomId, player2Id: socket.id});
         } else if (count > 2) {
             // send back just to self (last entered user)
             io.to(socket.id).emit('no-entry', roomId);
@@ -75,9 +73,26 @@ io.on('connection', (socket) => {
         socket.to(roomId).emit('receive-won-game');
     });
 
-    // socket.on('disconnect', () => {
-    //     console.log('user disconnected');
-    // });
+    socket.on("disconnect", () => {
+        console.log(socket.id, 'user disconnected');
+        // loop through rooms, find room with an id matching socket.id
+        readRoomsData((err, data) => {
+            if (err) {
+                console.log('error in disconnect');
+            } else {
+                const rooms = JSON.parse(data);
+                const roomToDelete = rooms.find(room => room.players?.includes(socket.id));
+                if (roomToDelete) {
+                    // socket emit to other player that they've been kicked out
+                    socket.to(roomToDelete.roomId).emit('other-disconnected');
+                    // delete room and repush all rooms to json
+                    const index = rooms.indexOf(roomToDelete);
+                    rooms.splice(index, 1);
+                    writeGameToJson(JSON.stringify(rooms));
+                }
+            }
+        })
+    });
 });
 
 // set up cors
