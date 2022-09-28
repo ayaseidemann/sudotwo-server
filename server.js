@@ -12,6 +12,7 @@ const io = require('socket.io')(server, {
 
 const cors = require('cors');
 const gameRoutes = require('./routes/gameRoutes');
+const { writeGameToJson, readRoomsData } = require('./models/gameModels');
 
 
 // connect socket.io
@@ -56,7 +57,6 @@ io.on('connection', (socket) => {
     });
 
     socket.on('send-name', (data) => {
-        console.log('data.sendName', data.sendName);
         socket.to(data.roomId).emit('receive-name', data.sendName);
     });
 
@@ -76,23 +76,23 @@ io.on('connection', (socket) => {
     socket.on("disconnect", () => {
         console.log(socket.id, 'user disconnected');
         // loop through rooms, find room with an id matching socket.id
-        // socket emit to other player that they've been kicked out
-        // delete room and repush all rooms to json
+        readRoomsData((err, data) => {
+            if (err) {
+                console.log('error in disconnect');
+            } else {
+                const rooms = JSON.parse(data);
+                const roomToDelete = rooms.find(room => room.players?.includes(socket.id));
+                if (roomToDelete) {
+                    // socket emit to other player that they've been kicked out
+                    socket.to(roomToDelete.roomId).emit('other-disconnected');
+                    // delete room and repush all rooms to json
+                    const index = rooms.indexOf(roomToDelete);
+                    rooms.splice(index, 1);
+                    writeGameToJson(JSON.stringify(rooms));
+                }
+            }
+        })
     });
-
-    // socket.on('user-disconnected', roomId => {
-    //     console.log('a user disconnected in room:', roomId);
-    //     socket.to(roomId).emit('receive-user-disconnected');
-    // });
-
-    // socket.on("disconnect", async () => {
-    //     console.log('starring disconnect func');
-    //     const sockets = await io.in(computeUserId(socket)).fetchSockets();
-    //     if (sockets.length === 0) {
-    //         console.log(socket.id, 'user has disconnected');
-    //       // no more active connections for the given user
-    //     }
-    // });
 });
 
 // set up cors

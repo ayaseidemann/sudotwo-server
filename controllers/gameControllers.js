@@ -33,7 +33,6 @@ async function setupGame(req, res) {
 }
 
 function addSocketId(req, res) {
-    console.log('in add socket id function');
     readRoomsData((err, data) => {
         if (err) {
             console.log('error in reading rooms data in add socket id function');
