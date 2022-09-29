@@ -28,8 +28,8 @@ Run development:
 
 **Environment variable example for .env file:**
 
-`API_SERVER_URL=<url of the api server>`
-`CLIENT_URL=<url of the client>`
+`API_SERVER_URL=<url of the api server>`\
+`CLIENT_URL=<url of the client>`\
 `PORT=<port number>`
 
 Your app is ready to be deployed!
