@@ -6,7 +6,7 @@ Client [repo](https://github.com/ayaseidemann/sudotwo-client)
 ## Description
 
 Sudotwo! is two-player a cooperative sudoku game site! A player is able to create their own game 
-room or join an existing room, and edit the board collaboratively with another player.
+room or join an existing room, and edit the board collaboratively with another player. Additional functionality includes emojis reactions to tiles, tile solution revealing, and game validation.
 
 ## Installation
 
